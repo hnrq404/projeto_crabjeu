@@ -9,7 +9,6 @@ banco=sqlite3.connect("caranguejo.db",check_same_thread=False)
 
 cursor = banco.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer)')
-print("teste")
 def main(page: Page):
     
     page.fonts = {
