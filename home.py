@@ -10,7 +10,12 @@ banco=sqlite3.connect("caranguejo.db",check_same_thread=False)
 cursor = banco.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer)')
 def main(page: Page):
-    
+    botao_clicavel = ft.ElevatedButton("",opacity=0)#botao em cima da seta de voltar
+    botao_voltar = ft.Stack([
+        ft.Image("Vector-removebg-preview.png",width=50),
+        botao_clicavel
+        
+    ])#botao de voltar
     page.fonts = {
         "Kanit": "https://raw.githubusercontent.com/google/fonts/master/ofl/kanit/Kanit-Bold.ttf",
         "Open Sans": "/fonts/OpenSans-Regular.ttf"
@@ -18,11 +23,11 @@ def main(page: Page):
     page.theme = Theme(font_family="Kanit")
     consulta = cursor.execute("SELECT * FROM usuarios3")
     consulta = consulta.fetchall()
-    text_consecutivos = ft.Text("0",size=30)
-    text_mudar_usuario = ft.TextField(label = "Novo nome de usuário...",width=400,color=ft.colors.BLACK,border_color=ft.colors.BLACK)
+    text_consecutivos = ft.Text("0",size=30)#caixa de texto para colocar quantidade de dias consecutivos
+    text_mudar_usuario = ft.TextField(label = "Novo nome de usuário...",width=400,color=ft.colors.BLACK,border_color=ft.colors.BLACK)#caixa de seleção para mudar o nome de usuário
     botao_fechar_configuracoes = ft.IconButton(ft.icons.CLOSE)
     botao_novo_usuario = ft.ElevatedButton("CONFIRMAR",width=200)
-    c = ft.Container(
+    c = ft.Container(#Container da caixa de configurações
         content= ft.Column([ft.Row([ft.Container(botao_fechar_configuracoes,alignment=ft.alignment.top_right,width=700)]),ft.Tabs(
         selected_index=0,
         animation_duration=300,
@@ -54,27 +59,29 @@ def main(page: Page):
     page.window_full_screen = True
     page.padding = 0
     page.title = "Routes Example"
-    text_username: ft.TextField = ft.TextField(label="Usuário",text_align=ft.TextAlign.LEFT,width=200,label_style=ft.TextStyle(color="#E77A52"))
-    text_password: ft.TextField = ft.TextField(label="Senha",text_align=ft.TextAlign.LEFT,width=200,password=True,label_style=ft.TextStyle(color="#E77A52"),can_reveal_password=True)
-    button_submit: ft.ElevatedButton = ft.ElevatedButton(text="ENTRAR",width=200,color="white",bgcolor="#E77A52",style=ft.ButtonStyle(
+    text_username: ft.TextField = ft.TextField(label="Usuário",text_align=ft.TextAlign.LEFT,width=240,label_style=ft.TextStyle(color="#E77A52"))
+    text_password: ft.TextField = ft.TextField(label="Senha",text_align=ft.TextAlign.LEFT,width=240,password=True,label_style=ft.TextStyle(color="#E77A52"),can_reveal_password=True)
+    button_submit: ft.ElevatedButton = ft.ElevatedButton(text="ENTRAR",width=200,color="white",bgcolor="#E77A52",style=ft.ButtonStyle(#botao para login
                 shape=ft.RoundedRectangleBorder(radius=0),))
     
     botao_cadastro = ft.ElevatedButton(text="Cadastre-se",width=150,color="white",bgcolor="#C1846F",style=ft.ButtonStyle(
                 shape=ft.RoundedRectangleBorder(radius=0),))
-    text_confirmar_senha: ft.TextField = ft.TextField(label="Confirmar senha",text_align=ft.TextAlign.LEFT,width=200,password=True)
-    button_registrar: ft.ElevatedButton = ft.ElevatedButton(text="REGISTRAR",width=200,color=colors.ORANGE_500)
+    text_confirmar_senha: ft.TextField = ft.TextField(label="Confirmar senha",text_align=ft.TextAlign.LEFT,width=240,password=True,label_style=ft.TextStyle(color="#E77A52"),can_reveal_password=True)
+    button_registrar: ft.ElevatedButton = ft.ElevatedButton(text="Registrar",width=200,color="white",bgcolor="#E77A52",style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=0),))
+    
     texto_ser_falado = ft.TextField(value=" ", text_align=ft.TextAlign.RIGHT, width=400)
     texto_certo_errado = ft.TextField(value=" ", text_align=ft.TextAlign.RIGHT, width=400)
     texto_erro = ft.Text(value="",color=ft.colors.RED_500)
     texto_acerto = ft.Text(value="",color=ft.colors.GREEN_500)
     progresso = ft.Slider(width=400,max=300)
-    texto_pontuacao = ft.Text("0",size=30)
-    text_level = ft.Text("0",size=30)
+    texto_pontuacao = ft.Text("0",size=30)#pontuacao do usuario
+    text_level = ft.Text("0",size=30)#level do usuario
     text_nome_usuario = ft.Text("",size=30)
     text_indice = ft.Text("0")
     level = ft.Text("0",size=30)
     pontuacao = ft.Text("0",size=30)
-    def update_task(e):
+    def update_task(e):#função para atualizar o nome do usuario no banco
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_mudar_usuario.value,))
         sql = ''' UPDATE usuarios3
                 SET usuario = ?
@@ -90,7 +97,7 @@ def main(page: Page):
     def progressoslider(e):
         progresso.value = texto_pontuacao.value
         page.update()
-    def registrar_conta(e):
+    def registrar_conta(e):#função para registrar uma conta
         consulta_usuarios = cursor.execute("SELECT usuario FROM usuarios3 WHERE usuario=?",(text_username.value,))
         res = consulta_usuarios.fetchall()
         if text_username.value != '' and text_password.value != '':
@@ -117,6 +124,9 @@ def main(page: Page):
         else:
             texto_erro.value = "Preencha todos os campos"
             page.update()
+    def irParaRegistrar(e):
+        page.go("/registrar")
+    botao_cadastro.on_click = irParaRegistrar
     def button_clicked(e):
             teste = "criança aprendendo a ler"
             texto_ser_falado.value = f"Diga {teste}"
@@ -142,7 +152,7 @@ def main(page: Page):
                     page.update()
             page.update()
     button_registrar.on_click = registrar_conta
-    def jogando(e):
+    def jogando(e):#função para aumentar a pontuação conforme o usuario vai jogando
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
         res = consulta.fetchall()
         if int(level.value) == 1:
@@ -206,7 +216,7 @@ def main(page: Page):
         banco.commit()
         page.update()
     
-    def jogar(e):
+    def jogar(e):#função para entrar na pagina de usuario confirmando o login
         consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
         res = consulta_usuarios.fetchall()
         data = res[0][4]
@@ -229,7 +239,7 @@ def main(page: Page):
             if str(jogador) == str(text_password.value):
                 page.go("/jogar")
                 page.update()
-    def ir_para_jogando(e):
+    def ir_para_jogando(e):#função para ir para a tela de jogo
         consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_nome_usuario.value,))
         res = consulta_usuarios.fetchall()
         contagem = len(res)
@@ -239,50 +249,19 @@ def main(page: Page):
         
         page.update()
         page.go("/jogando")
-    def fechar(e):
+    def fechar(e):#função para fecjar a pagina
         page.window_close()
     botao_sidebar = ft.IconButton(ft.icons.MENU)
     button_submit.on_click = jogar
-    principal = View(
-                "/",
-                [
-                    AppBar(title=Text("ÍNICIO"), bgcolor=colors.ORANGE_500),
-                    ft.Container(
-            content=ft.ElevatedButton("ENTRAR",width=200,on_click=lambda _: page.go("/store"),color=colors.ORANGE_500),
-            padding=5,
-            alignment=ft.alignment.center,
-            margin=ft.margin.only(top=200,left=500),
-            width=200
-        ),
-        ft.Container(
-            content=ft.ElevatedButton(
-                "REGISTRAR",
-                width=200,on_click=lambda _: page.go("/registrar"),color=colors.ORANGE_500
-            ),
-            padding=5,
-            alignment=ft.alignment.center,
-            width=200,
-            margin=ft.margin.only(left=500)
-        ),
-
-        ft.Container(
-            content=ft.ElevatedButton("SAIR",width=200,on_click=fechar,color=colors.ORANGE_500),
-            padding=5,
-            alignment=ft.alignment.center,
-            width=200,
-            margin=ft.margin.only(left=500)
-        ),
-                ]
-            )
     login = View(
-                    "/store",
+                    "/",
                     [
-                        ft.Container(ft.Stack([
+                        ft.Container(ft.Stack([ #Container com imagem de fundo
                             ft.Image(
                 src="Home Screan (3).png",
                 fit="cover",
             ),
-                        ft.Container(
+                        ft.Container( #Container da caixa de login
                             content=ft.Column([
                                 ft.Container(ft.Image(
                                                 src=f"MicrosoftTeams-image__1_-removebg-preview.png",
@@ -299,7 +278,7 @@ def main(page: Page):
                     ],
                                               ft.MainAxisAlignment.CENTER),
                             alignment=ft.alignment.center,
-                            bgcolor=ft.colors.WHITE,width=600,
+                            bgcolor="#EBEAEA",width=600,
                             margin=ft.margin.only(top=(page.window_height-400)/2,left=(page.window_width-400)/2,bottom=(page.window_height-200)/2,right=(page.window_width-400)/2),
                             opacity=1,
                             border=ft.border.all(3,color="#E77A52"),
@@ -309,18 +288,18 @@ def main(page: Page):
                 )
     login.padding = 0
     opcoes_icones = [ft.Icon(ft.icons.HOME),ft.Icon(ft.icons.ABC),ft.Icon(ft.icons.MONEY_ROUNDED)]
-    def animate_container(e):
+    def animate_container(e):#função para abrir as configurações
         c.height = 400
         c.margin = ft.margin.only(top=130,bottom=200,left=300)
         c.update()
         page.update()
-    def fechar_configuracoes(e):
+    def fechar_configuracoes(e):#função para fechar as configurações
         c.height = 0
         c.margin = ft.margin.only(top=0,bottom=0,left=0)
         c.update()
         page.update()
     botao_fechar_configuracoes.on_click = fechar_configuracoes
-    principal_jogo = View(
+    principal_jogo = View( #Não feita ainda
                     "/jogar",
                     [
                         AppBar(title=Text(""), bgcolor=colors.ORANGE_500,actions=[ft.IconButton(ft.icons.CONSTRUCTION_SHARP,tooltip="Configurações",on_click=animate_container)]),
@@ -375,19 +354,49 @@ def main(page: Page):
                     
                     
                 )
+    principal_jogo.padding = 0
+    
     registrar =  View(
                     "/registrar",
-                    [
-                        AppBar(title=Text("REGISTRAR"), bgcolor=colors.ORANGE_500),
-                        ft.Container(text_username,alignment=ft.alignment.center,width=300,margin=ft.margin.only(left=500,top=200)),
-                        ft.Container(text_password,alignment=ft.alignment.center,width=300,margin=ft.margin.only(left=500)),
-                        ft.Container(text_confirmar_senha,alignment=ft.alignment.center,width=300,margin=ft.margin.only(left=500)),
-                        ft.Container(button_registrar,alignment=ft.alignment.center,width=300,margin=ft.margin.only(left=500)),
-                        ft.Container(texto_erro,alignment=ft.alignment.center,width=300,margin=ft.margin.only(left=500)),
-                        ft.Container(texto_acerto,alignment=ft.alignment.center,width=300,margin=ft.margin.only(left=500))
-                    ]
+                   [
+                        ft.Container(ft.Stack([ #Container principal da página para colocar imagem de fundo
+                            ft.Image(
+                src="Home Screan (3).png",
+                fit="cover",
+            ),
+                        ft.Container( #Container com as caixas de seleção de registro
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Container(botao_voltar,alignment=ft.alignment.top_left,padding=ft.padding.all(0),margin=ft.margin.only(bottom=0,left=20,top=10))#Container para fazer a seta de voltar
+                                ]),
+                                ft.Row(
+                                    [ft.Container(ft.Image(
+                                                src=f"MicrosoftTeams-image__1_-removebg-preview.png",
+                                                width=300,
+                                                height=200),margin=ft.margin.only(left=90,top=-60),width=300,height=200,alignment=ft.alignment.top_center)
+                                    ]),
+                                
+                               ft.Container(ft.Column([ ft.Container(text_username,alignment=ft.alignment.center,width=300),
+                        ft.Container(text_password,alignment=ft.alignment.center,width=300),
+                        ft.Container(text_confirmar_senha,alignment=ft.alignment.center,width=300),
+                        ft.Container(button_registrar,alignment=ft.alignment.center,width=220,margin=ft.margin.only(bottom=30,left=(300-220)/2),
+                                     opacity=1)]),margin=ft.margin.only(left=90)),
+                    ],
+                                              ft.MainAxisAlignment.CENTER),
+                            alignment=ft.alignment.center,
+                            bgcolor="#EBEAEA",width=600,
+                            margin=ft.margin.only(top=(page.window_height-400)/2,left=(page.window_width-400)/2,bottom=(page.window_height-200)/2,right=(page.window_width-400)/2),
+                            opacity=1,
+                            border=ft.border.all(3,color="#E77A52"),
+                            border_radius=10,
+                            padding=0)]))
+                                ]
                 )
-    jogando_jogo = View(
+    def voltar_login(e):
+        page.go("/")
+    botao_clicavel.on_click = voltar_login
+    registrar.padding = 0
+    jogando_jogo = View(#página não feita ainda
                     "/jogando",
                     [
                         AppBar(title=Text("JOGO"), bgcolor=colors.ORANGE_500),
@@ -403,13 +412,14 @@ def main(page: Page):
                         ft.Container(content=level)])
                     ]
                 )
+    jogando_jogo.padding = 0
     def route_change(e):
         page.views.clear()
 
         page.views.append(
-            principal
+            login
         )
-        if page.route == "/store":
+        if page.route == "/":
             login.vertical_alignment = ft.MainAxisAlignment.CENTER
             login.horizontal_alignment =ft.CrossAxisAlignment.CENTER
             page.update()
