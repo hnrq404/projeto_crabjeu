@@ -5,17 +5,140 @@ import datetime
 import speech_recognition as sr
 import time
 
-banco=sqlite3.connect("caranguejo.db",check_same_thread=False)
+banco=sqlite3.connect("caranguejo4.db",check_same_thread=False)
 
 cursor = banco.cursor()
-cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer)')
+cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer,exp float)')
 def main(page: Page):
+    botao_clicavel_jogando = ft.ElevatedButton("",opacity=0)
+    botao_voltar_jogando = ft.Stack([
+        ft.Image("Vector-removebg-preview.png",width=50,color="black"),
+        botao_clicavel_jogando
+    
+    ])
+    botao_facil =  ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="FÁCIL", size=30),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=200,
+            height=60,bgcolor="#98f772",
+            color="black"
+        )
+    botao_medio =  ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="MÉDIO", size=30),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=200,
+            height=60,bgcolor="#f1f772",
+            color="black"
+        )
+    botao_dificil =  ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="DIFÍCIL", size=30),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=200,
+            height=60,bgcolor="#f77272",
+            color="black"
+        )
+    text_dias_consecutivos = ft.Text("Você está jogando a 5 dias consecutivos",size=20,color="white")
     botao_clicavel = ft.ElevatedButton("",opacity=0)#botao em cima da seta de voltar
     botao_voltar = ft.Stack([
         ft.Image("Vector-removebg-preview.png",width=50),
         botao_clicavel
-        
+    
     ])#botao de voltar
+    def voltar_usuario(e):
+        page.go("/jogar")
+    botao_clicavel_jogando.on_click = voltar_usuario
+    botao_jogar =  ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="JOGAR", size=20),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=235,
+            height=65
+        )
+    botao_configuracoes =  ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="CONFIGURAÇÕES", size=20),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=235,
+            height=65
+        )
+    botao_sair =  ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="SAIR DA CONTA", size=20),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=235,
+            height=65
+        )
+    progressobar = ft.ProgressBar(value=0,width=250,height=30,color="#ffd600",border_radius=20,semantics_label="13/100")
+    texto_exp = ft.Text("0/100",size=20)
+    texto_estrela = ft.Container(ft.Icon(ft.icons.STAR,color="yellow"),alignment=ft.alignment.center,margin=ft.margin.all(0))
+    texto_final = ft.Container(ft.Row([texto_exp,texto_estrela],alignment=ft.MainAxisAlignment.CENTER),alignment=ft.alignment.center,padding=0)
+    progresso_bar = ft.Container(
+        ft.Stack(
+            [
+            ft.Container(progressobar),
+            ft.Container(texto_final,width=250,alignment=ft.alignment.center_right)
+            ]
+    
+                 ),
+        alignment=ft.alignment.center
+        )
     page.fonts = {
         "Kanit": "https://raw.githubusercontent.com/google/fonts/master/ofl/kanit/Kanit-Bold.ttf",
         "Open Sans": "/fonts/OpenSans-Regular.ttf"
@@ -34,7 +157,7 @@ def main(page: Page):
         tabs=[
             ft.Tab(
                 tab_content=ft.Text("                    MUDAR NOME DE USUÁRIO                    ",color=ft.colors.BLACK),
-                content=ft.Container(alignment=ft.alignment.top_left,content=ft.Column([text_mudar_usuario,botao_novo_usuario]),margin=ft.margin.only(top=20))
+                content=ft.Container(alignment=ft.alignment.top_left,content=ft.Column([text_mudar_usuario,botao_novo_usuario]),margin=ft.margin.only(top=20),on_click=lambda x: print("")),
             ),
             ft.Tab(
                 tab_content=ft.Text("                    MUDAR SENHA                    ",color=ft.colors.BLACK),
@@ -76,12 +199,11 @@ def main(page: Page):
     texto_acerto = ft.Text(value="",color=ft.colors.GREEN_500)
     progresso = ft.Slider(width=400,max=300)
     texto_pontuacao = ft.Text("0",size=30)#pontuacao do usuario
-    text_level = ft.Text("0",size=30)#level do usuario
-    text_nome_usuario = ft.Text("",size=30)
-    text_indice = ft.Text("0")
+    text_level = ft.Text("0",size=30,color="white")#level do usuario
+    text_nome_usuario = ft.Text("",size=30,color="white")
     level = ft.Text("0",size=30)
     pontuacao = ft.Text("0",size=30)
-    def update_task(e):#função para atualizar o nome do usuario no banco
+    def update_usuario(e):#função para atualizar o nome do usuario no banco
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_mudar_usuario.value,))
         sql = ''' UPDATE usuarios3
                 SET usuario = ?
@@ -93,7 +215,7 @@ def main(page: Page):
             banco.commit()
             text_mudar_usuario.value = ""
             page.update()
-    botao_novo_usuario.on_click = update_task
+    botao_novo_usuario.on_click = update_usuario
     def progressoslider(e):
         progresso.value = texto_pontuacao.value
         page.update()
@@ -111,7 +233,7 @@ def main(page: Page):
                 texto_erro.value =  "Senhas não estão batendo"
                 page.update()
             else:
-                cursor.execute("INSERT INTO usuarios3(usuario,senha,level,pontuaçao,data,consecutivos) VALUES (?,?,?,?,?,?)",(str(text_username.value),str(text_password.value),1,0,str(datetime.date.today()),0))
+                cursor.execute("INSERT INTO usuarios3(usuario,senha,level,pontuaçao,data,consecutivos,exp) VALUES (?,?,?,?,?,?,?)",(str(text_username.value),str(text_password.value),1,0,str(datetime.date.today()),0,0))
                 banco.commit()
                 texto_erro.value = ""
                 texto_acerto.value = "Usuario cadastrado com sucesso,volte para o início para JOGAR!!"
@@ -152,43 +274,36 @@ def main(page: Page):
                     page.update()
             page.update()
     button_registrar.on_click = registrar_conta
+    def ir_para_dificuldade(e):
+        page.go("/dificuldade")
+        page.update()
     def jogando(e):#função para aumentar a pontuação conforme o usuario vai jogando
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
+        pontuacao.value = str(int(pontuacao.value)+10)
+        print(pontuacao.value)
+        print(progressobar.value)
+       
         res = consulta.fetchall()
-        if int(level.value) == 1:
-            if (int(pontuacao.value) >= 300 and int(pontuacao.value) < 600):
-                consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
-                res = consulta.fetchall()
-                cursor.execute("UPDATE usuarios3 SET pontuaçao = ? WHERE usuario = ?",(int(int(pontuacao.value)+100),str(text_username.value)))
-                cursor.execute("UPDATE usuarios3 SET level = ? WHERE usuario = ?",(2,str(text_username.value)))
-                pontuacao.value = str(int(pontuacao.value) + 100)
-                progresso.value = str(int(pontuacao.value)-300)
-                texto_pontuacao.value = str(f"Pontuação: {pontuacao.value}")
-                level.value = "2"
-                text_level.value = f"Level: {level.value}"
-                page.go("/jogar")
-                banco.commit()
-            else:
-                cursor.execute("UPDATE usuarios3 SET pontuaçao = ? WHERE usuario = ?",(int(int(pontuacao.value)+100),str(text_username.value)))
-                pontuacao.value = str(int(pontuacao.value) + 100)
-                progresso.value = pontuacao.value
-                banco.commit()
-        if int(level.value) == 2:
-                if int(pontuacao.value) >= 600:
-                    cursor.execute("UPDATE usuarios3 SET pontuaçao = ? WHERE usuario = ?",(int(int(pontuacao.value)+100),str(text_username.value)))
-                    cursor.execute("UPDATE usuarios3 SET level = ? WHERE usuario = ?",(3,str(text_username.value)))
-                    pontuacao.value = str(int(pontuacao.value) + 100)
-                    texto_pontuacao.value = str(f"Pontuação: {pontuacao.value}")
-                    progresso.value = str(int(pontuacao.value)-600)
-                    level.value = "3"
-                    text_level.value = f"Level: {level.value}"
-                    page.go("/jogar")
-                    banco.commit()
-                else:
-                    cursor.execute("UPDATE usuarios3 SET pontuaçao = ? WHERE usuario = ?",(int(int(pontuacao.value)+100),str(text_username.value)))
-                    pontuacao.value = str(int(pontuacao.value) + 100)
-                    progresso.value = pontuacao.value
-                    banco.commit()
+        if int(pontuacao.value) < 100:
+            text_level.value = "level 1"
+        elif int(pontuacao.value) < 1000 and int(pontuacao.value) >= 100:
+            text_level.value = f"level {int(str(pontuacao.value)[0]) + 1}"
+            
+        elif int(pontuacao.value) >= 1000 and int(pontuacao.value) < 10000:
+            text_level.value = f"level {int(str(pontuacao.value)[:2]) + 1}"
+        elif int(pontuacao.value) >= 10000 and int(pontuacao.value) < 100000:
+            text_level.value = f"level {int(str(pontuacao.value)[:3]) + 1}"
+        else:
+            text_level.value = f"level {int(str(pontuacao.value)[:4]) + 1}"
+        if progressobar.value < 0.88:
+            progressobar.value = progressobar.value + 0.1
+            texto_exp.value = f"{str(int(round(progressobar.value*100)))}/100"
+        else:
+            progressobar.value = 0
+            texto_exp.value = f"0/100"
+        cursor.execute("UPDATE usuarios3 SET level=? WHERE usuario=?",(text_level.value[6:],text_nome_usuario.value))
+        cursor.execute("UPDATE usuarios3 SET pontuaçao=? WHERE usuario=?",(pontuacao.value,text_nome_usuario.value))
+        cursor.execute("UPDATE usuarios3 SET exp=? WHERE usuario=?",(progressobar.value,text_nome_usuario.value))
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
         res = consulta.fetchall()
         data = res[0][4]
@@ -196,7 +311,6 @@ def main(page: Page):
         ano = int(string[0])
         mes = int(string[1])
         dia = int(string[2])
-        print(res[0][5])
         if datetime.date.today() - datetime.timedelta(days=1) == datetime.date(ano,mes,dia):
                     sql = ''' UPDATE usuarios3
                 SET consecutivos = ?
@@ -215,15 +329,17 @@ def main(page: Page):
         cursor.execute("UPDATE usuarios3 SET data = ? WHERE usuario = ?",(str(datetime.date.today()),str(text_username.value)))
         banco.commit()
         page.update()
-    
+    botao_jogar.on_click = ir_para_dificuldade
     def jogar(e):#função para entrar na pagina de usuario confirmando o login
         consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
         res = consulta_usuarios.fetchall()
-        data = res[0][4]
-        string = data.split("-")
-        ano = int(string[0])
-        mes = int(string[1])
-        dia = int(string[2])
+        print(res)
+        if len(res) > 0:
+            data = res[0][4]
+            string = data.split("-")
+            ano = int(string[0])
+            mes = int(string[1])
+            dia = int(string[2])
         if datetime.date.today() - datetime.timedelta(days=1) > datetime.date(ano,mes,dia):
             cursor.execute("UPDATE usuarios3 SET consecutivos = ? WHERE usuario = ?",(0,str(text_username.value)))
             banco.commit()
@@ -231,9 +347,12 @@ def main(page: Page):
         if len(res) > 0:
             progresso.value = str(res[contagem-1][3])
             texto_pontuacao.value = f"Pontuação: {str(res[contagem-1][3])}"
-            text_level.value = f"Level: {res[contagem-1][2]}"
-            text_consecutivos.value = f"Dias seguidos: {res[0][5]}"
+            pontuacao.value = f"{str(res[contagem-1][3])}"
+            text_level.value = f"Level {res[contagem-1][2]}"
             text_nome_usuario.value = text_username.value
+            progressobar.value = float(res[0][6])
+            texto_exp.value = f"{int(round(progressobar.value * 100))}/100"
+            text_dias_consecutivos.value = f"Você está jogando a {res[0][5]} dias consecutivos"
         if len(res) > 0:
             jogador = str(res[0][1])
             if str(jogador) == str(text_password.value):
@@ -249,22 +368,25 @@ def main(page: Page):
         
         page.update()
         page.go("/jogando")
-    def fechar(e):#função para fecjar a pagina
-        page.window_close()
-    botao_sidebar = ft.IconButton(ft.icons.MENU)
+    def fechar(e):#função para fechar a pagina
+        page.go("/")
+        text_username.value = ""
+        text_password.value = ""
+        page.update()
+    botao_sair.on_click = fechar
     button_submit.on_click = jogar
     login = View(
                     "/",
                     [
                         ft.Container(ft.Stack([ #Container com imagem de fundo
                             ft.Image(
-                src="Home Screan (3).png",
+                src="./assets/Home Screan (3).png",
                 fit="cover",
             ),
                         ft.Container( #Container da caixa de login
                             content=ft.Column([
                                 ft.Container(ft.Image(
-                                                src=f"MicrosoftTeams-image__1_-removebg-preview.png",
+                                                src=f"./assets/MicrosoftTeams-image__1_-removebg-preview.png",
                                                 width=300,
                                                 height=200,
                                                 fit=ft.ImageFit.CONTAIN,
@@ -289,109 +411,161 @@ def main(page: Page):
     login.padding = 0
     opcoes_icones = [ft.Icon(ft.icons.HOME),ft.Icon(ft.icons.ABC),ft.Icon(ft.icons.MONEY_ROUNDED)]
     def animate_container(e):#função para abrir as configurações
-        c.height = 400
-        c.margin = ft.margin.only(top=130,bottom=200,left=300)
+        c.height = 600
+        c.margin = ft.margin.only(top=130,bottom=250,left=300)
         c.update()
         page.update()
+    botao_configuracoes.on_click = animate_container
     def fechar_configuracoes(e):#função para fechar as configurações
         c.height = 0
         c.margin = ft.margin.only(top=0,bottom=0,left=0)
         c.update()
         page.update()
     botao_fechar_configuracoes.on_click = fechar_configuracoes
+    
     principal_jogo = View( #Não feita ainda
                     "/jogar",
                     [
-                        AppBar(title=Text(""), bgcolor=colors.ORANGE_500,actions=[ft.IconButton(ft.icons.CONSTRUCTION_SHARP,tooltip="Configurações",on_click=animate_container)]),
+                         ft.Container(
+           ft.Stack([
+                            ft.Image(
+                src="./assets/Home Screan (3).png",
+                fit="cover",
+            ),        
+                ft.Container(
+                    ft.Column([
                         c,
-                ft.Row([
-                    ft.CircleAvatar(content=opcoes_icones[0]),
-                    ft.Container(
-                    content=text_nome_usuario,
-                    margin=ft.margin.only(right=10,bottom=0),
-                    padding=10,
-                    alignment=ft.alignment.bottom_left,
-                    width=200,
-                    height=60,
+                        ft.Container(
+                        ft.Container(ft.Row([
+                            ft.Container(ft.Image("—Pngtree—transmission tower_744594.png",border_radius=100,width=60),bgcolor="orange",border_radius=100,margin=ft.margin.only(left=15)),
+                            ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=310,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)
+                        ]),bgcolor="white",width=400,height=70,border_radius=40,margin=ft.margin.only(right=0,top=10)),
+                                     alignment=ft.alignment.top_right
+                        )
+                    ,ft.Column([
+                    ft.Container( #Container da caixa de login
+                        content=botao_jogar,
+                            alignment=ft.alignment.center,
+                            margin=ft.margin.only(top=(page.window_height-100)/3),
+                            opacity=1,
+                            border_radius=10),
+                     ft.Container( #Container da caixa de login
+                        content=botao_configuracoes,
+                            alignment=ft.alignment.center,
+                            opacity=1,
+                            border_radius=10),
+                      ft.Container( #Container da caixa de login
+                        content=botao_sair,
+                            alignment=ft.alignment.center,
+                            opacity=1,
+                            border_radius=10),
+                    ft.Container(text_level,alignment=ft.alignment.center),
+                    ft.Container(progresso_bar,alignment=ft.alignment.center),
+                    ft.Container(text_dias_consecutivos,alignment=ft.alignment.center),])]),
+                    alignment=ft.alignment.center),
+                    
+                
+                    ])
                 ),
-                    ]),
-                ft.Column([
-                    ft.Row([
-                        ft.Container(ft.Image('—Pngtree—transmission tower_744594.png',height=80,fit=ft.ImageFit.CONTAIN),margin=ft.margin.only(right=-50,left=-30)),
-                ft.Container(
-                    content=text_level,
-                    margin=ft.margin.only(left=0,right=10,top=50),
-                    padding=10,
-                    alignment=ft.alignment.bottom_left,
-                    width=200,
-                    height=60,
-                )]),
-               ft.Row([
-                        ft.Container(ft.Image('fogo-fotor-bg-remover-2024041415114.png',height=50,fit=ft.ImageFit.CONTAIN),margin=ft.margin.only(right=-30,bottom=30,left=-10)),
-                ft.Container(
-                    content=texto_pontuacao,
-                    margin=ft.margin.only(left=0,right=10,top=0),
-                    padding=10,
-                    alignment=ft.alignment.center_left,
-                    width=500,
-                    height=60,
-                )]),
-                ft.Container(
-                    content=text_consecutivos,
-                    margin=ft.margin.only(right=10,top=0),
-                    padding=10,
-                    alignment=ft.alignment.center,
-                    bgcolor=ft.colors.BLUE_50,
-                    width=500,
-                    height=60,
-                    border_radius=10,
-                    border=ft.border.all(3, ft.colors.BLACK)),
+                    ]
                 
-                
-                ]),
-                ft.Row([ft.ElevatedButton("JOGAR",on_click=ir_para_jogando)])
-                    ],
+    )
                     
                     
-                )
+                    
     principal_jogo.padding = 0
     
     registrar =  View(
                     "/registrar",
-                   [
-                        ft.Container(ft.Stack([ #Container principal da página para colocar imagem de fundo
+                    [
+                        ft.Container(ft.Stack([ #Container com imagem de fundo
                             ft.Image(
-                src="Home Screan (3).png",
+                src="./assets/Home Screan (3).png",
                 fit="cover",
             ),
-                        ft.Container( #Container com as caixas de seleção de registro
+                        ft.Container(ft.Container( #Container da caixa de login
                             content=ft.Column([
-                                ft.Row([
-                                    ft.Container(botao_voltar,alignment=ft.alignment.top_left,padding=ft.padding.all(0),margin=ft.margin.only(bottom=0,left=20,top=10))#Container para fazer a seta de voltar
-                                ]),
-                                ft.Row(
-                                    [ft.Container(ft.Image(
-                                                src=f"MicrosoftTeams-image__1_-removebg-preview.png",
+                                ft.Container(botao_voltar,margin=ft.margin.only(bottom=0,left=15,top=15)),
+                                ft.Container(ft.Image(
+                                                src=f"./assets/MicrosoftTeams-image__1_-removebg-preview.png",
                                                 width=300,
-                                                height=200),margin=ft.margin.only(left=90,top=-60),width=300,height=200,alignment=ft.alignment.top_center)
-                                    ]),
-                                
-                               ft.Container(ft.Column([ ft.Container(text_username,alignment=ft.alignment.center,width=300),
+                                                height=200,
+                                                fit=ft.ImageFit.CONTAIN,
+                                                
+                                                )
+                                     ,alignment=ft.alignment.center,width=600,margin=ft.margin.only(bottom=0,top=-60)),
+                                ft.Container(ft.Column([ft.Container(text_username,alignment=ft.alignment.center,width=300),
                         ft.Container(text_password,alignment=ft.alignment.center,width=300),
                         ft.Container(text_confirmar_senha,alignment=ft.alignment.center,width=300),
                         ft.Container(button_registrar,alignment=ft.alignment.center,width=220,margin=ft.margin.only(bottom=30,left=(300-220)/2),
-                                     opacity=1)]),margin=ft.margin.only(left=90)),
-                    ],
-                                              ft.MainAxisAlignment.CENTER),
+                                     opacity=1)]),width=600,alignment=ft.alignment.center),
+                    ]),
                             alignment=ft.alignment.center,
-                            bgcolor="#EBEAEA",width=600,
-                            margin=ft.margin.only(top=(page.window_height-400)/2,left=(page.window_width-400)/2,bottom=(page.window_height-200)/2,right=(page.window_width-400)/2),
+                            bgcolor="#EBEAEA",width=500,
+                            margin=ft.margin.only(top=(page.window_height-400)/2,bottom=(page.window_height-200)/2),
                             opacity=1,
                             border=ft.border.all(3,color="#E77A52"),
-                            border_radius=10,
-                            padding=0)]))
+                            border_radius=10),alignment=ft.alignment.center)]),
+                                     )
                                 ]
+                        
                 )
+    selecionar_dificuldade = ft.View(
+                "/dificuldade",
+                [
+                    
+                    ft.Container(
+           ft.Stack([
+                            ft.Image(
+                src="./assets/Home Screan (3).png",
+                fit="cover",
+            ),        
+                    ft.Container(
+                        ft.Container(
+                            ft.Container(ft.Row([
+                            ft.Container(ft.Image("—Pngtree—transmission tower_744594.png",border_radius=100,width=60),bgcolor="orange",border_radius=100,margin=ft.margin.only(left=15)),
+                            ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=310,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)
+                        ]),bgcolor="white",width=400,height=70,border_radius=40),
+                            width=400,
+                            height=70,
+                            alignment=ft.alignment.top_right,
+                            bgcolor="white",
+                            border_radius=40
+                        ),
+                        
+                        
+                        height=100,alignment=ft.alignment.center_right
+                        
+                        ),
+                    ft.Container(
+                        ft.Container(
+                            ft.Column(
+                                [
+                                ft.Container(botao_voltar_jogando,margin=ft.margin.only(left=10,top=10)),
+                                ft.Row([
+                                    ft.Container(ft.Text("SELECIONE A DIFICULDADE",size=30,color="black"),margin=ft.margin.only(top=-50))
+                                ],
+                                    alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Column([
+                                    ft.Container(botao_facil,alignment=ft.alignment.center,margin=ft.margin.only(bottom=20)),
+                                    ft.Container(botao_medio,alignment=ft.alignment.center,margin=ft.margin.only(bottom=20)),
+                                    ft.Container(botao_dificil,alignment=ft.alignment.center)
+                                ]),
+                                ft.Container(ft.Text("Obs: Quanto maior a dificuldade, mais estrelas você poderá ganhar!!",color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(top=10,left=10))
+                            ]),
+                            width=600,
+                            height=360,
+                            bgcolor="white",
+                            border_radius=20,
+                            padding=0
+                        ),height=page.window_height,alignment=ft.alignment.center
+                       
+                    )
+             
+                ],
+            ))])
+    selecionar_dificuldade.padding=0
+    registrar.window_full_screen = False
     def voltar_login(e):
         page.go("/")
     botao_clicavel.on_click = voltar_login
@@ -403,7 +577,7 @@ def main(page: Page):
                         progresso,
                         ft.Row([
                         ft.Container(
-                    ft.IconButton(ft.icons.PLAY_ARROW,on_click=jogando)
+                    ft.IconButton(ft.icons.PLAY_ARROW)
                     
                 ),
                         ft.Container(
@@ -429,11 +603,11 @@ def main(page: Page):
         if page.route == "/jogar":
             consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_nome_usuario.value,))
             res = consulta_usuarios.fetchall()
-            print(res)
+            print(page.window_width)
             pontuacoes = res[0][3]
             levels = res[0][2]
             texto_pontuacao.value = f"Pontuação: {pontuacoes}"
-            text_level.value = f"Level: {levels}"
+            text_level.value = f"Level {levels}"
             text_level
             page.update()
             page.views.append(
@@ -442,6 +616,10 @@ def main(page: Page):
         if page.route == "/registrar":
             page.views.append(
                 registrar
+            )
+        if page.route == "/dificuldade":
+            page.views.append(
+                selecionar_dificuldade
             )
         progresso.on_change = progressoslider
         if page.route == "/jogando":
