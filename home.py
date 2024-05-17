@@ -10,6 +10,27 @@ banco=sqlite3.connect("caranguejo4.db",check_same_thread=False)
 cursor = banco.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer,exp float)')
 def main(page: Page):
+    def close_dlg(e):
+        dlg_modal.open = False
+        page.update()
+    def voltar_pagina_usuario(e):
+        page.go("/jogar")
+    
+    dlg_modal = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Tem certeza que deseja voltar?"),
+        content=ft.Text("Todo progresso até aqui será perdido!!"),
+        actions=[
+            ft.TextButton("SIM", on_click=voltar_pagina_usuario),
+            ft.TextButton("NÃO", on_click=close_dlg),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+    def open_dlg_modal(e):
+        page.dialog = dlg_modal
+        dlg_modal.open = True
+        page.update()
     botao_clicavel_jogando = ft.ElevatedButton("",opacity=0)
     botao_voltar_jogando = ft.Stack([
         ft.Image("Vector-removebg-preview.png",width=50,color="black"),
@@ -74,6 +95,13 @@ def main(page: Page):
         botao_clicavel
     
     ])#botao de voltar
+    botao_voltar2 = ft.ElevatedButton("",opacity=0)
+    botao_voltar_no_jogo = ft.Stack([
+        ft.Image("Vector-removebg-preview.png",width=50,color="white"),
+        botao_voltar2
+    
+    ])#botao de volta
+    botao_voltar2.on_click = open_dlg_modal
     def voltar_usuario(e):
         page.go("/jogar")
     botao_clicavel_jogando.on_click = voltar_usuario
@@ -157,7 +185,7 @@ def main(page: Page):
         tabs=[
             ft.Tab(
                 tab_content=ft.Text("                    MUDAR NOME DE USUÁRIO                    ",color=ft.colors.BLACK),
-                content=ft.Container(alignment=ft.alignment.top_left,content=ft.Column([text_mudar_usuario,botao_novo_usuario]),margin=ft.margin.only(top=20),on_click=lambda x: print("")),
+                content=ft.Container(alignment=ft.alignment.top_left,content=ft.Column([text_mudar_usuario,botao_novo_usuario]),margin=ft.margin.only(top=20)),
             ),
             ft.Tab(
                 tab_content=ft.Text("                    MUDAR SENHA                    ",color=ft.colors.BLACK),
@@ -280,8 +308,6 @@ def main(page: Page):
     def jogando(e):#função para aumentar a pontuação conforme o usuario vai jogando
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
         pontuacao.value = str(int(pontuacao.value)+10)
-        print(pontuacao.value)
-        print(progressobar.value)
        
         res = consulta.fetchall()
         if int(pontuacao.value) < 100:
@@ -333,7 +359,6 @@ def main(page: Page):
     def jogar(e):#função para entrar na pagina de usuario confirmando o login
         consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_username.value,))
         res = consulta_usuarios.fetchall()
-        print(res)
         if len(res) > 0:
             data = res[0][4]
             string = data.split("-")
@@ -437,8 +462,8 @@ def main(page: Page):
                         c,
                         ft.Container(
                         ft.Container(ft.Row([
-                            ft.Container(ft.Image("—Pngtree—transmission tower_744594.png",border_radius=100,width=60),bgcolor="orange",border_radius=100,margin=ft.margin.only(left=15)),
-                            ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=310,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)
+                            ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",height=70),margin=ft.margin.only(left=15)),
+                            ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=290,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)
                         ]),bgcolor="white",width=400,height=70,border_radius=40,margin=ft.margin.only(right=0,top=10)),
                                      alignment=ft.alignment.top_right
                         )
@@ -479,10 +504,10 @@ def main(page: Page):
                     "/registrar",
                     [
                         ft.Container(ft.Stack([ #Container com imagem de fundo
-                            ft.Image(
+                            ft.Container(ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
-            ),
+            ),height=page.window_height),
                         ft.Container(ft.Container( #Container da caixa de login
                             content=ft.Column([
                                 ft.Container(botao_voltar,margin=ft.margin.only(bottom=0,left=15,top=15)),
@@ -523,8 +548,8 @@ def main(page: Page):
                     ft.Container(
                         ft.Container(
                             ft.Container(ft.Row([
-                            ft.Container(ft.Image("—Pngtree—transmission tower_744594.png",border_radius=100,width=60),bgcolor="orange",border_radius=100,margin=ft.margin.only(left=15)),
-                            ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=310,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)
+                            ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",height=70),margin=ft.margin.only(left=15)),
+                            ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=290,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)
                         ]),bgcolor="white",width=400,height=70,border_radius=40),
                             width=400,
                             height=70,
@@ -564,28 +589,76 @@ def main(page: Page):
              
                 ],
             ))])
+    def ir_para_jogo(e):
+        page.go("/jogando")
+    botao_facil.on_click = ir_para_jogo
+    jogando_jogo = ft.View(
+                "/jogando",
+                [
+                    
+           ft.Stack([
+                            ft.Image(
+                src="./assets/Game Screen (write).png",
+                fit="cover",
+            ), 
+                            
+                    ft.Container(
+                        ft.Container(
+                            ft.Row([ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png"),alignment=ft.alignment.center,margin=ft.margin.only(left=10)),ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=295,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)]),
+                            width=400,
+                            height=70,
+                            alignment=ft.alignment.center_right,
+                            bgcolor="white",
+                            border_radius=40
+                        ),
+                        
+                        
+                        height=100,alignment=ft.alignment.center_right
+                        
+                        ),
+                    
+                    ft.Container(
+                        ft.Container(
+                            ft.Column(
+                                [
+                                    ft.Stack([
+                                    ft.Container(
+                                        ft.Container(ft.Text("Pergunta 1/5",size=50,color="black",weight=ft.FontWeight.BOLD),alignment=ft.alignment.center,width=500,bgcolor="white"),
+                                        height=130,
+                                        alignment=ft.alignment.center,
+                                        margin=ft.margin.only(top=60)
+
+                                    ),
+                                    ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",width=400,height=130),alignment=ft.alignment.center)
+                                    ]),
+                                    ft.Container(
+                                        ft.Row([ft.Container(ft.Text("Fale: ",size=30,color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(left=30)),ft.Container(ft.Text("BONJOUR PRINCESSE FUDIDA ARROMBADA DO KRAI",size=15,color="white",weight=ft.FontWeight.BOLD),height=70,width=680,bgcolor="#E77A52",border_radius=50,alignment=ft.alignment.center)],alignment=ft.MainAxisAlignment.CENTER),
+                                        height=75,
+                                        border_radius=50,
+                                        margin=ft.margin.only(top=50),
+                                        bgcolor="white",
+                                        alignment=ft.alignment.center_right
+                                        
+                                        ),
+                            ]),
+                            width=800,
+                            height=500,
+
+                            border_radius=0,
+                            padding=0
+                        ),height=page.window_height,alignment=ft.alignment.center
+                       
+                    ),
+                    ft.Container(botao_voltar_no_jogo,margin=ft.margin.only(left=10,top=10)),
+             
+                ],
+            )])
     selecionar_dificuldade.padding=0
     registrar.window_full_screen = False
     def voltar_login(e):
         page.go("/")
     botao_clicavel.on_click = voltar_login
     registrar.padding = 0
-    jogando_jogo = View(#página não feita ainda
-                    "/jogando",
-                    [
-                        AppBar(title=Text("JOGO"), bgcolor=colors.ORANGE_500),
-                        progresso,
-                        ft.Row([
-                        ft.Container(
-                    ft.IconButton(ft.icons.PLAY_ARROW)
-                    
-                ),
-                        ft.Container(
-                            content=pontuacao
-                        ),
-                        ft.Container(content=level)])
-                    ]
-                )
     jogando_jogo.padding = 0
     def route_change(e):
         page.views.clear()
@@ -603,7 +676,7 @@ def main(page: Page):
         if page.route == "/jogar":
             consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_nome_usuario.value,))
             res = consulta_usuarios.fetchall()
-            print(page.window_width)
+
             pontuacoes = res[0][3]
             levels = res[0][2]
             texto_pontuacao.value = f"Pontuação: {pontuacoes}"
