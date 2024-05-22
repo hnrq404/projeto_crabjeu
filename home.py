@@ -184,26 +184,39 @@ def main(page: Page):
         animation_duration=300,
         tabs=[
             ft.Tab(
-                tab_content=ft.Text("                    MUDAR NOME DE USUÁRIO                    ",color=ft.colors.BLACK),
-                content=ft.Container(alignment=ft.alignment.top_left,content=ft.Column([text_mudar_usuario,botao_novo_usuario]),margin=ft.margin.only(top=20)),
+                tab_content=ft.Container(ft.Text("MUDAR NOME DE USUÁRIO",color="black"),width=200,height=50,alignment=ft.alignment.center),
+                content=ft.Container(ft.Column([
+                ft.Container(ft.TextField(label="Novo nome de usuário...",text_align=ft.TextAlign.LEFT,width=400,label_style=ft.TextStyle(color="#7F7F7F"),border_color="black"),margin=ft.margin.only(top=20)),
+                    ft.Container(content=ft.TextField(label="Confirmar nome de usuário...",text_align=ft.TextAlign.LEFT,width=400,label_style=ft.TextStyle(color="#7F7F7F"),border_color="black"))
+                    ]),alignment=ft.alignment.center,margin=ft.margin.only(top=150))
             ),
             ft.Tab(
-                tab_content=ft.Text("                    MUDAR SENHA                    ",color=ft.colors.BLACK),
-                content=ft.Column([
-                    ft.Container(alignment=ft.alignment.top_left,content=ft.TextField(label = "Nova senha...",width=400),margin=ft.margin.only(top=20)),
-                    ft.Container(alignment=ft.alignment.top_left,content=ft.TextField(label ="Confirmar nova senha...",width=400))
-                    ])
+                tab_content=ft.Container(ft.Text("MUDAR SENHA",color="black"),width=200,height=50,alignment=ft.alignment.center),
+                content=ft.Container(ft.Column([
+                    ft.Container(ft.TextField(label="Senha atual...",text_align=ft.TextAlign.LEFT,width=400,label_style=ft.TextStyle(color="#7F7F7F")),alignment=ft.alignment.center),
+                    ft.Container(content=ft.TextField(label="Nova senha...",text_align=ft.TextAlign.LEFT,width=400,label_style=ft.TextStyle(color="#7F7F7F")),alignment=ft.alignment.center),
+                    ft.Container(content=ft.TextField(label="Confirmar nova senha...",text_align=ft.TextAlign.LEFT,width=400,label_style=ft.TextStyle(color="#7F7F7F")),alignment=ft.alignment.center),
+                    ft.Container(ft.ElevatedButton("SALVAR",width=200),alignment=ft.alignment.center),
+                    ]),alignment=ft.alignment.center,margin=ft.margin.only(top=150))
+            ),
+            ft.Tab(
+                tab_content=ft.Container(ft.Text("MUDAR ÍCONE DE USUÁRIO",color="black"),width=200,height=50,alignment=ft.alignment.center),
+                content=ft.Container(ft.Column([
+                    ft.Container(content=ft.TextField(label = "Nova senha...",width=400),margin=ft.margin.only(top=20)),
+                    ft.Container(content=ft.TextField(label ="Confirmar nova senha...",width=400))
+                    ]),alignment=ft.alignment.center,margin=ft.margin.only(top=150))
             ),
         ],
         expand=1,
-        divider_color=ft.colors.BLACK45,
+        indicator_tab_size=False,
+        indicator_color="#E77A52"
     )]),
         width=700,
         height=0,
         animate=ft.animation.Animation(1000, ft.AnimationCurve.BOUNCE_OUT),
         alignment=ft.alignment.bottom_right,
         padding=ft.padding.only(top=0),
-        bgcolor=ft.colors.AMBER_50,
+        bgcolor="white",
         border=ft.border.all(2,color=ft.colors.BLACK),
         border_radius=20
     )
@@ -408,7 +421,7 @@ def main(page: Page):
                 src="./assets/Home Screan (3).png",
                 fit="cover",
             ),
-                        ft.Container( #Container da caixa de login
+                        ft.Container(ft.Container( #Container da caixa de login
                             content=ft.Column([
                                 ft.Container(ft.Image(
                                                 src=f"./assets/MicrosoftTeams-image__1_-removebg-preview.png",
@@ -426,10 +439,10 @@ def main(page: Page):
                                               ft.MainAxisAlignment.CENTER),
                             alignment=ft.alignment.center,
                             bgcolor="#EBEAEA",width=600,
-                            margin=ft.margin.only(top=(page.window_height-400)/2,left=(page.window_width-400)/2,bottom=(page.window_height-200)/2,right=(page.window_width-400)/2),
+                            height=500,
                             opacity=1,
                             border=ft.border.all(3,color="#E77A52"),
-                            border_radius=10)]))
+                            border_radius=10),alignment=ft.alignment.center,height=page.window_height)]))
                                 ]
                         
                 )
@@ -437,13 +450,11 @@ def main(page: Page):
     opcoes_icones = [ft.Icon(ft.icons.HOME),ft.Icon(ft.icons.ABC),ft.Icon(ft.icons.MONEY_ROUNDED)]
     def animate_container(e):#função para abrir as configurações
         c.height = 600
-        c.margin = ft.margin.only(top=130,bottom=250,left=300)
         c.update()
         page.update()
     botao_configuracoes.on_click = animate_container
     def fechar_configuracoes(e):#função para fechar as configurações
         c.height = 0
-        c.margin = ft.margin.only(top=0,bottom=0,left=0)
         c.update()
         page.update()
     botao_fechar_configuracoes.on_click = fechar_configuracoes
@@ -456,10 +467,9 @@ def main(page: Page):
                             ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
-            ),        
-                ft.Container(
+            ),
+                ft.Container(ft.Container(
                     ft.Column([
-                        c,
                         ft.Container(
                         ft.Container(ft.Row([
                             ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",height=70),margin=ft.margin.only(left=15)),
@@ -468,6 +478,7 @@ def main(page: Page):
                                      alignment=ft.alignment.top_right
                         )
                     ,ft.Column([
+                        ft.Container(c,alignment=ft.alignment.center),
                     ft.Container( #Container da caixa de login
                         content=botao_jogar,
                             alignment=ft.alignment.center,
@@ -487,11 +498,14 @@ def main(page: Page):
                     ft.Container(text_level,alignment=ft.alignment.center),
                     ft.Container(progresso_bar,alignment=ft.alignment.center),
                     ft.Container(text_dias_consecutivos,alignment=ft.alignment.center),])]),
-                    alignment=ft.alignment.center),
+                    alignment=ft.alignment.center)),
+                
+                
                     
                 
-                    ])
-                ),
+                    ]),
+                             
+               alignment=ft.alignment.center ),
                     ]
                 
     )
@@ -507,7 +521,7 @@ def main(page: Page):
                             ft.Container(ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
-            ),height=page.window_height),
+                            )),
                         ft.Container(ft.Container( #Container da caixa de login
                             content=ft.Column([
                                 ft.Container(botao_voltar,margin=ft.margin.only(bottom=0,left=15,top=15)),
