@@ -13,6 +13,9 @@ def main(page: Page):
     def close_dlg(e):
         dlg_modal.open = False
         page.update()
+    def fechar_alerta_registro(e):
+        erro_registro.open = False
+        page.update()
     def voltar_pagina_usuario(e):
         page.go("/jogar")
     
@@ -23,6 +26,15 @@ def main(page: Page):
         actions=[
             ft.TextButton("SIM", on_click=voltar_pagina_usuario),
             ft.TextButton("NÃO", on_click=close_dlg),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+    erro_registro = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Preencha todos os campos!!!"),
+        content=ft.Text(""),
+        actions=[
+            ft.TextButton("OK", on_click=fechar_alerta_registro),
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -265,13 +277,19 @@ def main(page: Page):
         res = consulta_usuarios.fetchall()
         if text_username.value != '' and text_password.value != '':
             if len(res) > 0:
-                texto_erro.value = "Usuario já cadastrado"
+                page.dialog = erro_registro
+                erro_registro.open = True
+                erro_registro.title = ft.Text("Usuario já cadastrado!!!",color="red")
                 page.update()
             elif len(str(text_password.value)) < 5 or " " in str(text_password.value):
-                texto_erro.value = "Digite uma senha com 5 dígitos ou mais e sem espaços em branco"
+                page.dialog = erro_registro
+                erro_registro.open = True
+                erro_registro.title = ft.Text("Digite uma senha com no mínimo 5 dígitos!!!",color="red")
                 page.update()
             elif text_password.value != text_confirmar_senha.value:
-                texto_erro.value =  "Senhas não estão batendo"
+                page.dialog = erro_registro
+                erro_registro.open = True
+                erro_registro.title = ft.Text("As senhas não são iguais!!!",color="red")
                 page.update()
             else:
                 cursor.execute("INSERT INTO usuarios3(usuario,senha,level,pontuaçao,data,consecutivos,exp) VALUES (?,?,?,?,?,?,?)",(str(text_username.value),str(text_password.value),1,0,str(datetime.date.today()),0,0))
@@ -281,11 +299,14 @@ def main(page: Page):
                 text_confirmar_senha.value = ''
                 text_username.value = ''
                 text_password.value = ''
+                page.go("/")
                 page.update()
                 time.sleep(5)
                 texto_acerto.value = ""   
         else:
-            texto_erro.value = "Preencha todos os campos"
+            page.dialog = erro_registro
+            erro_registro.open = True
+            erro_registro.title = ft.Text("Preencha todos os campos!!!",color="red")
             page.update()
     def irParaRegistrar(e):
         page.go("/registrar")
@@ -378,9 +399,15 @@ def main(page: Page):
             ano = int(string[0])
             mes = int(string[1])
             dia = int(string[2])
-        if datetime.date.today() - datetime.timedelta(days=1) > datetime.date(ano,mes,dia):
-            cursor.execute("UPDATE usuarios3 SET consecutivos = ? WHERE usuario = ?",(0,str(text_username.value)))
-            banco.commit()
+            if datetime.date.today() - datetime.timedelta(days=1) > datetime.date(ano,mes,dia):
+                cursor.execute("UPDATE usuarios3 SET consecutivos = ? WHERE usuario = ?",(0,str(text_username.value)))
+                banco.commit()
+        else:
+            page.dialog = erro_registro
+            erro_registro.open = True
+            erro_registro.title = ft.Text("Usuário não cadastrado!!!",color="red")
+            page.update()
+        
         contagem = len(res)
         if len(res) > 0:
             progresso.value = str(res[contagem-1][3])
@@ -395,6 +422,11 @@ def main(page: Page):
             jogador = str(res[0][1])
             if str(jogador) == str(text_password.value):
                 page.go("/jogar")
+                page.update()
+            else:
+                page.dialog = erro_registro
+                erro_registro.open = True
+                erro_registro.title = ft.Text("Senha incorreta!!!",color="red")
                 page.update()
     def ir_para_jogando(e):#função para ir para a tela de jogo
         consulta_usuarios = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_nome_usuario.value,))
@@ -420,6 +452,7 @@ def main(page: Page):
                             ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
+                height=770
             ),
                         ft.Container(ft.Container( #Container da caixa de login
                             content=ft.Column([
@@ -467,6 +500,7 @@ def main(page: Page):
                             ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
+                height=770
             ),
                 ft.Container(ft.Container(
                     ft.Column([
@@ -521,6 +555,7 @@ def main(page: Page):
                             ft.Container(ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
+                height=770
                             )),
                         ft.Container(ft.Container( #Container da caixa de login
                             content=ft.Column([
@@ -558,6 +593,7 @@ def main(page: Page):
                             ft.Image(
                 src="./assets/Home Screan (3).png",
                 fit="cover",
+                height=770
             ),        
                     ft.Container(
                         ft.Container(
@@ -614,6 +650,7 @@ def main(page: Page):
                             ft.Image(
                 src="./assets/Game Screen (write).png",
                 fit="cover",
+                height=770
             ), 
                             
                     ft.Container(
