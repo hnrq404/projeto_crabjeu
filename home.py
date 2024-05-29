@@ -1,5 +1,5 @@
 import flet as ft
-from flet import AppBar,Page, Text, View, colors,Theme
+from flet import Page,View,Theme
 import sqlite3
 import datetime
 import speech_recognition as sr
@@ -13,7 +13,8 @@ cursor = banco.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer,exp float)')
 def main(page: Page):
     texto_falado_indice = ft.Text("0")
-    texto_a_ser_falado = ft.Text("BONJOUR PRINCESSE FUDIDA ARROMBADA DO KRAI",size=15,color="white",weight=ft.FontWeight.BOLD)
+    texto_pergunta = ft.Text("Questão 1/6",size=50,color="black",weight=ft.FontWeight.BOLD)
+    texto_a_ser_falado = ft.Text("BONJOUR PRINCESSE FUDIDA ARROMBADA DO KRAI",size=25,color="white",weight=ft.FontWeight.BOLD)
     def close_dlg(e):
         dlg_modal.open = False
         page.update()
@@ -21,12 +22,13 @@ def main(page: Page):
         erro_registro.open = False
         page.update()
     def voltar_pagina_usuario(e):
+        texto_pergunta.value = 'Questão 1/5'
         page.go("/jogar")
     botao_falar = ft.ElevatedButton(
             content=ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text(value="Aperte para falar", size=20),
+                        ft.Text(value="Aperte quando estiver pronto", size=20),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=5,
@@ -35,8 +37,8 @@ def main(page: Page):
             ),
             style=ft.ButtonStyle(#botao para login
             shape=ft.RoundedRectangleBorder(radius=20),color="black"),
-            width=250,
-            height=50
+            width=350,
+            height=60
         )
     
     botao_alternativa_A = ft.ElevatedButton(content=ft.Text("a) Bom dia princesa",size=20),width=500,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
@@ -48,8 +50,6 @@ def main(page: Page):
     botao_alternativa_D = ft.ElevatedButton(content=ft.Text("d) Bom dia princesa",size=20),width=500,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
                 shape=ft.RoundedRectangleBorder(radius=20),))
     
-    texto_falado = ft.Text("Você falou boujour princess")
-    container_falou = ft.Container(texto_falado,height=0,alignment=ft.alignment.center)
     container_botao_falar = ft.Container(
                                         botao_falar,
                                         alignment=ft.alignment.center,
@@ -62,6 +62,39 @@ def main(page: Page):
         actions=[
             ft.TextButton("SIM", on_click=voltar_pagina_usuario),
             ft.TextButton("NÃO", on_click=close_dlg),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+    def ir_para_proxima_questao(e):
+        consulta = cursor_questoes.execute("SELECT * FROM questoes WHERE frances=?",(texto_a_ser_falado.value,))
+        res = consulta.fetchall()
+        botao_alternativa_A.content = ft.Text(res[0][1])
+        botao_alternativa_B.content = ft.Text(res[0][2])
+        botao_alternativa_C.content = ft.Text(res[0][3])
+        botao_alternativa_D.content = ft.Text(res[0][4])
+        texto_pergunta.value = f"Questão {int(texto_pergunta.value[8])+1}/6"
+        page.go("/jogando_alternativa")
+    def fechar_erro_audio(e):
+        page.dialog = errou_audio
+        errou_audio.open = False
+        container_botao_falar.height = 60
+        container_texto_falado.height = 0
+        page.update()
+    errou_audio = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Não foi possível compreender o áudio"),
+        content=ft.Text("Tente novamente"),
+        actions=[
+            ft.TextButton("Ok", on_click=fechar_erro_audio),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+    errou_questão = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Você errou!!"),
+        content=ft.Text("Você falou Bonjour princess"),
+        actions=[
+            ft.TextButton("Próxima Questão", on_click=ir_para_proxima_questao),
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -294,21 +327,52 @@ def main(page: Page):
     level = ft.Text("0",size=30)
     pontuacao = ft.Text("0",size=30)
     def jogou(e):
-        consulta = cursor_questoes.execute("SELECT * FROM questoes WHERE frances=?",(texto_a_ser_falado.value,))
-        res = consulta.fetchall()
-        container_falou.height = 50
-        print(texto_falado_indice.value)
-        botao_alternativa_A.content = ft.Text(res[0][1])
-        botao_alternativa_B.content = ft.Text(res[0][2])
-        botao_alternativa_C.content = ft.Text(res[0][3])
-        botao_alternativa_D.content = ft.Text(res[0][4])
-        container_botao_falar.margin = ft.margin.only(top=0)
-        page.update()
-        time.sleep(5)
-        container_falou.height = 0
-        container_botao_falar.margin = ft.margin.only(top=50)
-        page.go("/jogando_alternativa")
-        page.update()
+            container_contagem.height = 50
+            container_botao_falar.margin = ft.margin.only(top=0)
+            for i in [3,2,1]:
+                texto_contagem.value = f"{i}"
+                time.sleep(1)
+                page.update()
+            time.sleep(1)
+            container_botao_falar.height = 0
+            container_contagem.height = 0
+            container_texto_falado.height = 80
+            page.update()
+            page.dialog = errou_questão
+            print("clicado")
+            teste = texto_a_ser_falado.value
+            r = sr.Recognizer()
+            try:
+                with sr.Microphone() as fonte:
+                        r.adjust_for_ambient_noise(fonte,)
+                        audio = r.listen(fonte, phrase_time_limit=3)
+                        texto = r.recognize_google(audio, language="fr-FR")
+                if texto.lower() == teste:
+                    errou_questão.title = ft.Text("Parabéns você acertou!!")
+                    errou_questão.content = ft.Text(f"Você falou {texto}")
+                    errou_questão.open = True
+                    page.go("/jogando_alternativa")
+                    page.update()
+                    
+                    page.update()
+                else:
+                    page.dialog = errou_questão
+                    errou_questão.title = ft.Text("Você errou!!")
+                    errou_questão.content = ft.Text(f"Você falou {texto}")
+                    errou_questão.open = True
+                    page.update()
+            except:
+                    print("deu merda")
+                    page.dialog = errou_audio
+                    errou_audio.content = ft.Text(" ")
+                    errou_audio.title = ft.Text("Não foi possível compreender o áudio")
+                    errou_audio.open = True
+                    texto_certo_errado.value = "não foi possível compreender o áudio"
+                    page.update()
+            page.update()
+            
+            page.update()
+            page.update()
     botao_falar.on_click=jogou
     def update_usuario(e):#função para atualizar o nome do usuario no banco
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_mudar_usuario.value,))
@@ -365,30 +429,7 @@ def main(page: Page):
     def irParaRegistrar(e):
         page.go("/registrar")
     botao_cadastro.on_click = irParaRegistrar
-    def button_clicked(e):
-            teste = "criança aprendendo a ler"
-            texto_ser_falado.value = f"Diga {teste}"
-            texto_certo_errado.value = ""
-            page.update()
-            r = sr.Recognizer()
-            try:
-                with sr.Microphone() as fonte:
-                        page.update()
-                        r.adjust_for_ambient_noise(fonte,)
-                        audio = r.listen(fonte, phrase_time_limit=3)
-                        texto = r.recognize_google(audio, language="pt-BR")
-                if texto.lower() == teste:
-                    texto_certo_errado.value = "ACERTOU!!"
-                    page.update()
-                    
-                    page.update()
-                else:
-                    texto_certo_errado.value = "ERROU!!!"
-                    page.update()
-            except:
-                    texto_certo_errado.value = "não foi possível compreender o áudio"
-                    page.update()
-            page.update()
+    
     button_registrar.on_click = registrar_conta
     def ir_para_dificuldade(e):
         page.go("/dificuldade")
@@ -705,6 +746,21 @@ def main(page: Page):
         page.update()
         page.go("/jogando")
     botao_facil.on_click = ir_para_jogo
+    container_texto_falado = ft.Container(
+                                        ft.Row([ft.Container(ft.Text("Fale: ",size=30,color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(left=30)),ft.Container(texto_a_ser_falado,height=70,width=680,bgcolor="#E77A52",border_radius=50,alignment=ft.alignment.center)],alignment=ft.MainAxisAlignment.CENTER),
+                                        height=0,
+                                        border_radius=50,
+                                        margin=ft.margin.only(top=50),
+                                        bgcolor="white",
+                                        alignment=ft.alignment.center_right
+                                        
+                                        )
+    texto_contagem = ft.Text("",size=30,color="white")
+    container_contagem = ft.Container(
+        texto_contagem,
+        height=0,
+        alignment=ft.alignment.center
+    )
     jogando_jogo_falando = ft.View(
                 "/jogando",
                 [
@@ -737,7 +793,7 @@ def main(page: Page):
                                 [
                                     ft.Stack([
                                     ft.Container(
-                                        ft.Container(ft.Text("Pergunta 1/5",size=50,color="black",weight=ft.FontWeight.BOLD),alignment=ft.alignment.center,width=500,bgcolor="white"),
+                                        ft.Container(texto_pergunta,alignment=ft.alignment.center,width=500,bgcolor="white"),
                                         height=130,
                                         alignment=ft.alignment.center,
                                         margin=ft.margin.only(top=60)
@@ -745,16 +801,9 @@ def main(page: Page):
                                     ),
                                     ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",width=400,height=130),alignment=ft.alignment.center)
                                     ]),
-                                    ft.Container(
-                                        ft.Row([ft.Container(ft.Text("Fale: ",size=30,color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(left=30)),ft.Container(texto_a_ser_falado,height=70,width=680,bgcolor="#E77A52",border_radius=50,alignment=ft.alignment.center)],alignment=ft.MainAxisAlignment.CENTER),
-                                        height=75,
-                                        border_radius=50,
-                                        margin=ft.margin.only(top=50),
-                                        bgcolor="white",
-                                        alignment=ft.alignment.center_right
-                                        
-                                        ),
-                                    container_falou,
+                                    container_contagem,
+                                    container_texto_falado
+                                    ,
                                     container_botao_falar
                             ]),
                             width=800,
@@ -801,7 +850,7 @@ def main(page: Page):
                                 [
                                     ft.Stack([
                                     ft.Container(
-                                        ft.Container(ft.Text("Pergunta 1/5",size=50,color="black",weight=ft.FontWeight.BOLD),alignment=ft.alignment.center,width=500,bgcolor="white"),
+                                        ft.Container(texto_pergunta,alignment=ft.alignment.center,width=500,bgcolor="white"),
                                         height=130,
                                         alignment=ft.alignment.center,
                                         margin=ft.margin.only(top=60)
