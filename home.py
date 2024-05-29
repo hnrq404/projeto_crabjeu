@@ -4,12 +4,16 @@ import sqlite3
 import datetime
 import speech_recognition as sr
 import time
+import random
 
 banco=sqlite3.connect("caranguejo4.db",check_same_thread=False)
-
+banco_questoes = sqlite3.connect("questoes.db",check_same_thread=False)
+cursor_questoes = banco_questoes.cursor()
 cursor = banco.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS usuarios3 (usuario text,senha text,level integer,pontuaçao integer,data text,consecutivos integer,exp float)')
 def main(page: Page):
+    texto_falado_indice = ft.Text("0")
+    texto_a_ser_falado = ft.Text("BONJOUR PRINCESSE FUDIDA ARROMBADA DO KRAI",size=15,color="white",weight=ft.FontWeight.BOLD)
     def close_dlg(e):
         dlg_modal.open = False
         page.update()
@@ -18,7 +22,39 @@ def main(page: Page):
         page.update()
     def voltar_pagina_usuario(e):
         page.go("/jogar")
+    botao_falar = ft.ElevatedButton(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(value="Aperte para falar", size=20),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=5,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            style=ft.ButtonStyle(#botao para login
+            shape=ft.RoundedRectangleBorder(radius=20),color="black"),
+            width=250,
+            height=50
+        )
     
+    botao_alternativa_A = ft.ElevatedButton(content=ft.Text("a) Bom dia princesa",size=20),width=500,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
+                shape=ft.RoundedRectangleBorder(radius=20)))
+    botao_alternativa_B = ft.ElevatedButton(content=ft.Text("b) Bom dia princesa",size=20),width=500,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
+                shape=ft.RoundedRectangleBorder(radius=20),))
+    botao_alternativa_C = ft.ElevatedButton(content=ft.Text("c) Bom dia princesa",size=20),width=500,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
+                shape=ft.RoundedRectangleBorder(radius=20),))
+    botao_alternativa_D = ft.ElevatedButton(content=ft.Text("d) Bom dia princesa",size=20),width=500,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
+                shape=ft.RoundedRectangleBorder(radius=20),))
+    
+    texto_falado = ft.Text("Você falou boujour princess")
+    container_falou = ft.Container(texto_falado,height=0,alignment=ft.alignment.center)
+    container_botao_falar = ft.Container(
+                                        botao_falar,
+                                        alignment=ft.alignment.center,
+                                        margin=ft.margin.only(top=50),
+                                    )
     dlg_modal = ft.AlertDialog(
         modal=True,
         title=ft.Text("Tem certeza que deseja voltar?"),
@@ -29,6 +65,7 @@ def main(page: Page):
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
+    
     erro_registro = ft.AlertDialog(
         modal=True,
         title=ft.Text("Preencha todos os campos!!!"),
@@ -256,6 +293,23 @@ def main(page: Page):
     text_nome_usuario = ft.Text("",size=30,color="white")
     level = ft.Text("0",size=30)
     pontuacao = ft.Text("0",size=30)
+    def jogou(e):
+        consulta = cursor_questoes.execute("SELECT * FROM questoes WHERE frances=?",(texto_a_ser_falado.value,))
+        res = consulta.fetchall()
+        container_falou.height = 50
+        print(texto_falado_indice.value)
+        botao_alternativa_A.content = ft.Text(res[0][1])
+        botao_alternativa_B.content = ft.Text(res[0][2])
+        botao_alternativa_C.content = ft.Text(res[0][3])
+        botao_alternativa_D.content = ft.Text(res[0][4])
+        container_botao_falar.margin = ft.margin.only(top=0)
+        page.update()
+        time.sleep(5)
+        container_falou.height = 0
+        container_botao_falar.margin = ft.margin.only(top=50)
+        page.go("/jogando_alternativa")
+        page.update()
+    botao_falar.on_click=jogou
     def update_usuario(e):#função para atualizar o nome do usuario no banco
         consulta = cursor.execute("SELECT * FROM usuarios3 WHERE usuario=?",(text_mudar_usuario.value,))
         sql = ''' UPDATE usuarios3
@@ -639,10 +693,19 @@ def main(page: Page):
              
                 ],
             ))])
+    
     def ir_para_jogo(e):
+        texto = random.randint(0,4)
+        texto_falado_indice.value = str(texto)
+        print(texto_falado_indice.value)
+        consulta = cursor_questoes.execute('SELECT * FROM questoes')
+        res = consulta.fetchall()
+        texto_questao = res[texto][0]
+        texto_a_ser_falado.value = texto_questao
+        page.update()
         page.go("/jogando")
     botao_facil.on_click = ir_para_jogo
-    jogando_jogo = ft.View(
+    jogando_jogo_falando = ft.View(
                 "/jogando",
                 [
                     
@@ -683,7 +746,7 @@ def main(page: Page):
                                     ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",width=400,height=130),alignment=ft.alignment.center)
                                     ]),
                                     ft.Container(
-                                        ft.Row([ft.Container(ft.Text("Fale: ",size=30,color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(left=30)),ft.Container(ft.Text("BONJOUR PRINCESSE FUDIDA ARROMBADA DO KRAI",size=15,color="white",weight=ft.FontWeight.BOLD),height=70,width=680,bgcolor="#E77A52",border_radius=50,alignment=ft.alignment.center)],alignment=ft.MainAxisAlignment.CENTER),
+                                        ft.Row([ft.Container(ft.Text("Fale: ",size=30,color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(left=30)),ft.Container(texto_a_ser_falado,height=70,width=680,bgcolor="#E77A52",border_radius=50,alignment=ft.alignment.center)],alignment=ft.MainAxisAlignment.CENTER),
                                         height=75,
                                         border_radius=50,
                                         margin=ft.margin.only(top=50),
@@ -691,9 +754,78 @@ def main(page: Page):
                                         alignment=ft.alignment.center_right
                                         
                                         ),
+                                    container_falou,
+                                    container_botao_falar
                             ]),
                             width=800,
                             height=500,
+
+                            border_radius=0,
+                            padding=0
+                        ),height=page.window_height,alignment=ft.alignment.center
+                       
+                    ),
+                    ft.Container(botao_voltar_no_jogo,margin=ft.margin.only(left=10,top=10)),
+             
+                ],
+            )])
+    jogando_jogo_alternativa = ft.View(
+                "/jogando_alternativa",
+                [
+                    
+           ft.Stack([
+                            ft.Image(
+                src="./assets/Game Screen (write).png",
+                fit="cover",
+                height=770
+            ), 
+                            
+                    ft.Container(
+                        ft.Container(
+                            ft.Row([ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png"),alignment=ft.alignment.center,margin=ft.margin.only(left=10)),ft.Container(ft.Container(text_nome_usuario,margin=ft.margin.only(right=50)),width=295,height=65,bgcolor="#E77A52",border_radius=40,margin=ft.margin.only(right=5),alignment=ft.alignment.center_right)]),
+                            width=400,
+                            height=70,
+                            alignment=ft.alignment.center_right,
+                            bgcolor="white",
+                            border_radius=40
+                        ),
+                        
+                        
+                        height=100,alignment=ft.alignment.center_right
+                        
+                        ),
+                    
+                    ft.Container(
+                        ft.Container(
+                            ft.Column(
+                                [
+                                    ft.Stack([
+                                    ft.Container(
+                                        ft.Container(ft.Text("Pergunta 1/5",size=50,color="black",weight=ft.FontWeight.BOLD),alignment=ft.alignment.center,width=500,bgcolor="white"),
+                                        height=130,
+                                        alignment=ft.alignment.center,
+                                        margin=ft.margin.only(top=60)
+
+                                    ),
+                                    ft.Container(ft.Image("./assets/carangueijo_sem_fundo.png",width=400,height=130),alignment=ft.alignment.center)
+                                    ]),
+                                    ft.Container(
+                                        ft.Row([ft.Container(ft.Text("Qual a tradução da frase: ",size=30,color="black",weight=ft.FontWeight.BOLD),margin=ft.margin.only(left=30)),ft.Container(texto_a_ser_falado,height=70,width=680,bgcolor="#E77A52",border_radius=50,alignment=ft.alignment.center)],alignment=ft.MainAxisAlignment.CENTER),
+                                        height=75,
+                                        border_radius=50,
+                                        margin=ft.margin.only(top=50),
+                                        bgcolor="white",
+                                        alignment=ft.alignment.center_right
+                                        
+                                        ),
+                                    ft.Container(botao_alternativa_A,alignment=ft.alignment.center,margin=ft.margin.only(top=30)),
+                                    ft.Container(botao_alternativa_B,alignment=ft.alignment.center),
+                                    ft.Container(botao_alternativa_C,alignment=ft.alignment.center),
+                                    ft.Container(botao_alternativa_D,alignment=ft.alignment.center),
+                                    
+                            ]),
+                            width=1100,
+                            height=600,
 
                             border_radius=0,
                             padding=0
@@ -710,7 +842,8 @@ def main(page: Page):
         page.go("/")
     botao_clicavel.on_click = voltar_login
     registrar.padding = 0
-    jogando_jogo.padding = 0
+    jogando_jogo_falando.padding = 0
+    jogando_jogo_alternativa.padding = 0
     def route_change(e):
         page.views.clear()
 
@@ -749,7 +882,12 @@ def main(page: Page):
         if page.route == "/jogando":
             page.update()
             page.views.append(
-                jogando_jogo
+                jogando_jogo_falando
+            )
+        if page.route == "/jogando_alternativa":
+            page.update()
+            page.views.append(
+                jogando_jogo_alternativa
             )
     
         page.update()
