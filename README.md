@@ -10,6 +10,6 @@
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_2.png" alt="img-tela-principal">
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_4.png" alt="img-config">
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_5.png" alt="img-dificultty">
-<img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_6.png" alt="img-voice-questions">
-<img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_7.png" alt="img-write-questions">
+<img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/jogo-voice.png" alt="img-voice-questions">
+<img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/jogo-write.png" alt="img-write-questions">
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_8.png" alt="img-recompensa">
