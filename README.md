@@ -5,3 +5,4 @@
 <br>
 <h4>Protótipo do sistema:</h4>
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/loginScreen.png" alt="img-login">
+<img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_1.png" alt="img-tela-principal">
