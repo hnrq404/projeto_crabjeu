@@ -6,3 +6,4 @@
 <h4>Protótipo do sistema:</h4>
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/loginScreen.png" alt="img-login">
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_2.png" alt="img-tela-principal">
+<img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Screenshot_4.png" alt="img-config">
