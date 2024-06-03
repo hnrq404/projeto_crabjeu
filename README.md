@@ -1,5 +1,8 @@
 <h1>Crabjeu</h1>
 <br>
+<h4>Descrição textual do sistema:</h4>
+<p>Sistema para ajudar no aprendizado do francês através de um jogo. Cada usuário terá um nível que aumenta conforme o mesmo continua o seu progresso. Na tela de início do jogo, temos três níveis disponíveis, quanto mais difícil o nível selecionado, mais pontos o usuário ganhará e mais rápido avançará de nível.  O jogo em si funciona de duas formas, tem as questões faladas e as questões de tradução. Nas questões faladas o usuário deverá pronunciar de forma correta a frase mostrada, caso o usuário não acerte, terá a opção de escutar a forma correta de fala, e nas questões de tradução o usuário deverá selecionar a alternativa correta da tradução da frase falada, caso erre será mostrada a tradução correta.</p>
+<br>
 <h4>Diagrama de casos de uso:</h4>
 <img src="https://github.com/hnrq404/projeto_crabjeu/blob/main/Diagrama%20-%20Crabjeu.png" alt= "driagrama" width="750px">
 <br>
