@@ -11,6 +11,7 @@ banco=sqlite3.connect("caranguejo4.db",check_same_thread=False)
 banco_questoes = sqlite3.connect("questoes.db",check_same_thread=False)
 cursor_questoes = banco_questoes.cursor()
 cursor = banco.cursor()
+#teste
 cursor.execute('CREATE TABLE IF NOT EXISTS usuarios5 (usuario text,senha text,level integer,data text,consecutivos integer,exp integer,icone text,pontos_nivel int)')
 def main(page: Page):
     botao_confirmar_icone = ft.ElevatedButton(content=ft.Text("Confirmar",size=20),width=200,height=50,color="black",bgcolor="white",style=ft.ButtonStyle(#botao para login
