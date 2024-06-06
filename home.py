@@ -22,7 +22,7 @@ def main(page: Page):
     texto_falado_indice = ft.Text("0")
     texto_pontuacao_soma = ft.Text("0")
     texto_pergunta = ft.Text("Questão 1/6",size=50,color="black",weight=ft.FontWeight.BOLD)
-    texto_a_ser_falado = ft.Text("BONJOUR PRINCESSE FUDIDA ARROMBADA DO KRAI",size=25,color="white",weight=ft.FontWeight.BOLD)
+    texto_a_ser_falado = ft.Text(" ",size=25,color="white",weight=ft.FontWeight.BOLD)
     text_valor_clickado = ft.Text("0")
     def a_clicked(e):
         text_valor_clickado.value = "0"
